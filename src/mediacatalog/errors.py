@@ -6,3 +6,6 @@ class IncorrectType(CatalogError):
 
 class ExistingID(CatalogError):
     pass
+
+class ItemNotFound(CatalogError):
+    pass

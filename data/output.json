@@ -1,0 +1,26 @@
+{
+    "9": {
+        "id": "9",
+        "name": "111",
+        "category": "music",
+        "year": 2024,
+        "creator": "sqwore",
+        "duration in minutes": 3
+    },
+    "10": {
+        "id": "10",
+        "name": "аквариум",
+        "category": "music",
+        "year": 2022,
+        "creator": "sqwore",
+        "duration in minutes": 2
+    },
+    "11": {
+        "id": "11",
+        "name": "Рандеву",
+        "category": "music",
+        "year": 2023,
+        "creator": "soltwine",
+        "duration in minutes": 4
+    }
+}

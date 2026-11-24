@@ -1,67 +1,65 @@
 import errors
 from models import MediaItem
 from typing import Any, Iterator
+from storage import load_from_json, save_in_json
+
 
 
 class Catalog:
     """Catalog of media library items"""
-    def __init__(self, json_file_input={}, json_file_output="output.json"):
+    def __init__(self, json_file_output=""):
         """Initialization of catalog"""
 
-        if json_file_input:
-            pass
+        if json_file_output:
+            self.json_file_output = "../data/" + json_file_output
+            self.items = load_from_json(self.json_file_output)
         else:
+            self.json_file_output = "../data/output.json"
             self.items = {}
 
     def add(self, item: MediaItem) -> None:
         """Add item in catalog"""
 
-        item_id, item_value = item.for_dict()
-
         if type(item) == MediaItem:
-            if item_id in self.items:
-                raise errors.ExistingID(f"ID '{item_id}' already exists")
-            
-            check_type(item_id, item_value)
-            self.items[item_id] = item_value
+            check_type(*item.for_dict())
+            if item.item_id in self.items:
+                raise errors.ExistingID(f"ID '{item.item_id}' already exists")
+            self.items[item.item_id] = item
         else:
             raise errors.IncorrectType(f"type of item '{type(item)}' not MediaItem.")
 
+        save_in_json(self.json_file_output, self.items)
+
     def get(self, item_id: str) -> MediaItem:
         """Get item in catalog by id"""
-        return [item for item in self.items if item]
+        try:
+            return self.items[item_id]
+        except KeyError:
+            raise errors.ItemNotFound(f"ID '{item_id}' not in catalog")
 
     def remove(self, item_id:str) -> Any:
         """Remove item from catalog by id"""
         try:
-            return self.items.pop(item_id)
-        except:
-            print("There is no such ID.")
-            return ""
+            item = self.items.pop(item_id)
+            save_in_json(self.json_file_output, self.items)
+            return item
+        except KeyError:
+            raise errors.ItemNotFound(f"ID '{item_id}' not in catalog")
 
-    def find_by_category(self, category:str) -> dict:
+    def find_by_category(self, category:str) -> list[MediaItem]:
         """Find an item by category"""
+        return [i for i in self.items.values() if i.category.lower() == category.lower()]
 
-        ids = {}
-        for item_id, item in self.items.items():
-            if item["category"].lower() == category.lower():
-                ids[item_id] = item
-        return ids
-
-    def find_by_name(self, query:str) -> dict:
+    def find_by_name(self, query:str) -> list[MediaItem]:
         """Find an item by name"""
-
-        ids = {}
-        for item_id, item in self.items.items():
-            if item["name"].lower() == query.lower():
-                ids[item_id] = item
-        return ids
+        return [i for i in self.items.values() if i.name.lower() == query.lower()]
 
     def __len__(self) -> int:
         return len(self.items)
 
-    def __iter__(self) -> Iterator:
-        return iter(self.items.items())
+    def __iter__(self) -> Iterator[MediaItem]:
+        """Objects in the order of addition."""
+        return iter(list(self.items.values()))
 
     def __contains__(self, item_id:str) -> bool:
         return item_id in self.items 
