@@ -1,21 +1,25 @@
-import errors
-from models import MediaItem
+from . import errors
+from .models import MediaItem
 from typing import Any, Iterator
-from storage import load_from_json, save_in_json
+from .storage import load_from_json, save_in_json
 
 
 
 class Catalog:
     """Catalog of media library items"""
-    def __init__(self, json_file_output=""):
-        """Initialization of catalog"""
 
-        if json_file_output:
-            self.json_file_output = "../data/" + json_file_output
-            self.items = load_from_json(self.json_file_output)
-        else:
-            self.json_file_output = "../data/output.json"
-            self.items = {}
+    def __init__(self):
+        """Initialization of catalog"""
+        self.items = {}
+
+    def save(self, path) -> None:
+        """Save the catalog to a JSON file (format_version 1)"""
+        save_in_json(path, self.items)
+
+    def load(self, path) -> None:
+            """Load the catalog content with the content of a JSON file."""
+            items = load_from_json(path)
+            self.items = items
 
     def add(self, item: MediaItem) -> None:
         """Add item in catalog"""
@@ -28,8 +32,6 @@ class Catalog:
         else:
             raise errors.IncorrectType(f"type of item '{type(item)}' not MediaItem.")
 
-        save_in_json(self.json_file_output, self.items)
-
     def get(self, item_id: str) -> MediaItem:
         """Get item in catalog by id"""
         try:
@@ -41,7 +43,6 @@ class Catalog:
         """Remove item from catalog by id"""
         try:
             item = self.items.pop(item_id)
-            save_in_json(self.json_file_output, self.items)
             return item
         except KeyError:
             raise errors.ItemNotFound(f"ID '{item_id}' not in catalog")
@@ -63,9 +64,6 @@ class Catalog:
 
     def __contains__(self, item_id:str) -> bool:
         return item_id in self.items 
-
-
-
 
 
 def check_type(item_id:str, item_value:dict) -> None:

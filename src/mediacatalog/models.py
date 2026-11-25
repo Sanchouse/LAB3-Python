@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-import errors
+from . import errors
 
 MIN_YEAR = 1850
 
